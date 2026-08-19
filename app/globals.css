@@ -105,10 +105,19 @@ nav a {
   border: 1px solid #fff;
 }
 
+.outline:hover {
+  background: #fff;
+  color: var(--primary);
+}
+
 .outline.dark {
   border-color: var(--border);
   color: var(--dark);
   background: #fff;
+}
+
+.outline.dark:hover {
+  background: var(--cream);
 }
 
 .wide {
@@ -211,6 +220,10 @@ nav a {
   outline: none;
 }
 
+.filters input {
+  flex: 1;
+}
+
 .filters input:focus,
 .filters select:focus,
 .admin-form input:focus,
@@ -219,19 +232,15 @@ nav a {
   border-color: var(--primary);
 }
 
-.filters input {
-  flex: 1;
-}
-
 /* =========================
    PRODUCTS
-   Two large columns
+   3 COLUMNS ON ALL DEVICES
 ========================= */
 
 .products {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 32px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
 }
 
 .card {
@@ -240,6 +249,7 @@ nav a {
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 5px 20px #28141e08;
+  min-width: 0;
   transition:
     transform 0.25s ease,
     box-shadow 0.25s ease;
@@ -247,7 +257,7 @@ nav a {
 
 .card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 15px 35px #28141e12;
+  box-shadow: 0 14px 35px #28141e15;
 }
 
 .card-image {
@@ -269,20 +279,15 @@ nav a {
   transform: scale(1.04);
 }
 
-/* =========================
-   STOCK BADGE
-========================= */
-
 .stock {
   position: absolute;
-  top: 14px;
-  left: 14px;
-  padding: 6px 10px;
+  top: 12px;
+  left: 12px;
+  padding: 5px 9px;
   border-radius: 30px;
   background: #fff;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 900;
-  box-shadow: 0 3px 10px #00000012;
 }
 
 .stock.low {
@@ -293,12 +298,8 @@ nav a {
   color: #a32626;
 }
 
-/* =========================
-   PRODUCT DETAILS
-========================= */
-
 .card-body {
-  padding: 22px;
+  padding: 18px;
 }
 
 .category {
@@ -310,21 +311,20 @@ nav a {
 }
 
 .card h3 {
-  font: 700 1.35rem Georgia, serif;
-  margin: 6px 0;
+  font: 700 1.2rem Georgia, serif;
+  margin: 5px 0;
 }
 
 .card p {
   color: var(--muted);
   min-height: 45px;
-  font-size: 0.9rem;
-  margin-bottom: 8px;
+  font-size: 0.86rem;
 }
 
 .price {
   display: block;
-  font-size: 1.3rem;
-  margin: 16px 0;
+  font-size: 1.15rem;
+  margin: 14px 0;
 }
 
 .empty {
@@ -503,10 +503,6 @@ footer {
   margin: 10px 0;
 }
 
-/* =========================
-   ADMIN PRODUCT LIST
-========================= */
-
 .admin-list {
   display: grid;
   gap: 10px;
@@ -548,8 +544,15 @@ footer {
 }
 
 /* =========================
-   TABLET
+   RESPONSIVE
 ========================= */
+
+/*
+   IMPORTANT:
+   Products intentionally remain
+   3 columns across desktop,
+   tablet and mobile.
+*/
 
 @media (max-width: 700px) {
   nav a:not(.button) {
@@ -560,29 +563,39 @@ footer {
     min-height: 560px;
   }
 
-  /*
-    Keep two products per row on tablets
-    and normal-sized phones.
-  */
   .products {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
   }
 
   .card-body {
-    padding: 17px;
+    padding: 12px;
   }
 
   .card h3 {
-    font-size: 1.15rem;
+    font-size: 1rem;
   }
 
   .card p {
-    font-size: 0.84rem;
+    font-size: 0.75rem;
+    min-height: 38px;
   }
 
   .price {
-    font-size: 1.15rem;
+    font-size: 1rem;
+    margin: 10px 0;
+  }
+
+  .card .button {
+    padding: 9px 8px;
+    font-size: 0.75rem;
+  }
+
+  .stock {
+    top: 7px;
+    left: 7px;
+    padding: 4px 6px;
+    font-size: 0.6rem;
   }
 
   .about-grid {
@@ -606,18 +619,19 @@ footer {
   }
 }
 
-/* =========================
-   SMALL PHONES
-========================= */
-
 @media (max-width: 480px) {
   /*
-    One large product per row on very
-    small screens for readability.
+     Still 3 columns.
+     Smaller gaps/padding keep the cards usable.
   */
+
   .products {
-    grid-template-columns: 1fr;
-    gap: 20px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .section {
+    padding: 60px 10px;
   }
 
   .filters {
@@ -626,6 +640,48 @@ footer {
 
   .values {
     grid-template-columns: 1fr;
+  }
+
+  .card {
+    border-radius: 9px;
+  }
+
+  .card-body {
+    padding: 9px;
+  }
+
+  .card h3 {
+    font-size: 0.85rem;
+    line-height: 1.2;
+  }
+
+  .category {
+    font-size: 0.55rem;
+    letter-spacing: 0.8px;
+  }
+
+  .card p {
+    font-size: 0.68rem;
+    min-height: 32px;
+    line-height: 1.35;
+  }
+
+  .price {
+    font-size: 0.85rem;
+    margin: 8px 0;
+  }
+
+  .card .button {
+    padding: 8px 5px;
+    font-size: 0.62rem;
+    border-radius: 6px;
+  }
+
+  .stock {
+    font-size: 0.5rem;
+    top: 5px;
+    left: 5px;
+    padding: 3px 5px;
   }
 
   .admin-item {
