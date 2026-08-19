@@ -15,6 +15,7 @@ const money = (value: number) =>
 export default function Storefront({ products }: { products: Product[] }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
+  const [sharingId, setSharingId] = useState<string | number | null>(null);
 
   const categories = useMemo(
     () => [...new Set(products.map((p) => p.category))].sort(),
@@ -33,73 +34,98 @@ export default function Storefront({ products }: { products: Product[] }) {
     );
   });
 
-  const orderOnWhatsApp = async (product: Product) => {
-    const message = `Hello AGNELY's VENTURE, I am interested in "${product.title}" priced at ${money(
+  const getOrderMessage = (product: Product) =>
+    `Hello AGNELY's VENTURE, I am interested in "${product.title}" priced at ${money(
       product.price
     )}. Please confirm availability.`;
 
+  const orderOnWhatsApp = (product: Product) => {
+    const message = getOrderMessage(product);
+
     /*
-     * Try to share the actual product image together with
-     * the order details using the device's native share sheet.
+     * Keep this as a normal wa.me link.
      *
-     * This allows WhatsApp to receive the image as an
-     * actual image attachment/preview rather than just
-     * receiving the image URL as text.
-     */
-    try {
-      if (navigator.share && navigator.canShare) {
-        const response = await fetch(product.image_url);
-
-        if (!response.ok) {
-          throw new Error("Unable to load product image");
-        }
-
-        const blob = await response.blob();
-
-        const extension =
-          blob.type === "image/png"
-            ? "png"
-            : blob.type === "image/webp"
-              ? "webp"
-              : "jpg";
-
-        const file = new File(
-          [blob],
-          `${product.title.replace(/[^a-z0-9]/gi, "-").toLowerCase()}.${extension}`,
-          {
-            type: blob.type || "image/jpeg",
-          }
-        );
-
-        const shareData = {
-          text: message,
-          files: [file],
-        };
-
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share(shareData);
-          return;
-        }
-      }
-    } catch (error) {
-      /*
-       * Ignore cancellation from the native share sheet.
-       * For other failures, fall back to normal WhatsApp text.
-       */
-      if (error instanceof Error && error.name === "AbortError") {
-        return;
-      }
-    }
-
-    /*
-     * Fallback for browsers/devices that don't support
-     * sharing image files.
+     * This guarantees that a new customer who does not have
+     * the number saved is taken directly into the AGNELY's
+     * VENTURE WhatsApp conversation with the product details
+     * already filled in.
      */
     window.open(
       `https://wa.me/${WA}?text=${encodeURIComponent(message)}`,
       "_blank",
       "noopener,noreferrer"
     );
+  };
+
+  const shareProductImage = async (product: Product) => {
+    if (!navigator.share || !navigator.canShare) {
+      window.alert(
+        "Your browser does not support image sharing. Please use Order on WhatsApp instead."
+      );
+      return;
+    }
+
+    setSharingId(product.id);
+
+    try {
+      const response = await fetch(product.image_url);
+
+      if (!response.ok) {
+        throw new Error("Unable to load product image.");
+      }
+
+      const blob = await response.blob();
+
+      const extension =
+        blob.type === "image/png"
+          ? "png"
+          : blob.type === "image/webp"
+            ? "webp"
+            : "jpg";
+
+      const safeName =
+        product.title
+          .replace(/[^a-z0-9]/gi, "-")
+          .replace(/-+/g, "-")
+          .replace(/^-|-$/g, "")
+          .toLowerCase() || "product";
+
+      const file = new File(
+        [blob],
+        `${safeName}.${extension}`,
+        {
+          type: blob.type || "image/jpeg",
+        }
+      );
+
+      const shareData = {
+        title: product.title,
+        text: getOrderMessage(product),
+        files: [file],
+      };
+
+      if (!navigator.canShare({ files: [file] })) {
+        throw new Error("This device does not support image sharing.");
+      }
+
+      await navigator.share(shareData);
+    } catch (error) {
+      /*
+       * Do nothing if the customer simply closes/cancels
+       * the native share dialog.
+       */
+      if (error instanceof Error && error.name === "AbortError") {
+        return;
+      }
+
+      console.error("Product image sharing failed:", error);
+
+      window.alert(
+        "The product image could not be shared from this device. Please use Order on WhatsApp instead."
+      );
+    } finally {
+      setSharingId(null);
+    }
   };
 
   return (
@@ -198,6 +224,8 @@ export default function Storefront({ products }: { products: Product[] }) {
                     ? `Only ${p.stock} left`
                     : `${p.stock} available`;
 
+              const isSharing = sharingId === p.id;
+
               return (
                 <article className="card" key={p.id}>
                   <div className="card-image">
@@ -224,13 +252,26 @@ export default function Storefront({ products }: { products: Product[] }) {
                     </strong>
 
                     {p.stock > 0 ? (
-                      <button
-                        type="button"
-                        className="button wide"
-                        onClick={() => orderOnWhatsApp(p)}
-                      >
-                        Order on WhatsApp
-                      </button>
+                      <>
+                        <button
+                          type="button"
+                          className="button wide"
+                          onClick={() => orderOnWhatsApp(p)}
+                        >
+                          Order on WhatsApp
+                        </button>
+
+                        <button
+                          type="button"
+                          className="button wide outline"
+                          onClick={() => shareProductImage(p)}
+                          disabled={isSharing}
+                        >
+                          {isSharing
+                            ? "Preparing Image..."
+                            : "Share Product Image"}
+                        </button>
+                      </>
                     ) : (
                       <button
                         type="button"
