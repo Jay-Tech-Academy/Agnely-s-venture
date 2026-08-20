@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import type { Product } from "@/lib/types";
 
-const WA = "2348129284013";
+const WA = "2349071854178";
 
 const money = (value: number) =>
   new Intl.NumberFormat("en-NG", {
@@ -150,7 +150,7 @@ export default function Storefront({ products }: { products: Product[] }) {
           <span className="eyebrow">LET&apos;S TALK</span>
           <h2>Looking for something beautiful?</h2>
           <p>Ask about fabrics, sizes, prices, accessories or complete outfits.</p>
-          <strong>08129284013</strong>
+          <strong>09071854178</strong>
           <a className="button" href={`https://wa.me/${WA}`} target="_blank">Chat With AGNELY&apos;s VENTURE</a>
         </section>
       </main>
